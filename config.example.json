@@ -1,0 +1,24 @@
+{
+  "timezone": "Asia/Shanghai",
+  "pronoun": "TA",
+  "chats": [
+    {
+      "id": "demo",
+      "name": "示例项目",
+      "cwd": "/path/to/your/project"
+    },
+    {
+      "id": "buddy",
+      "name": "助手",
+      "cwd": "/path/to/a/folder/for/your/companion",
+      "companion": true
+    }
+  ],
+  "proactive": {
+    "enabled": false
+  },
+  "compact": {
+    "at": 0.5,
+    "keepTurns": 30
+  }
+}

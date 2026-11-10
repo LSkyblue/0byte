@@ -1,0 +1,11 @@
+{
+  "name": "0byte",
+  "short_name": "0byte",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#FFFFFF",
+  "icons": [
+    { "src": "/icon-512.png?v=2", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png?v=2", "sizes": "180x180", "type": "image/png" }
+  ]
+}

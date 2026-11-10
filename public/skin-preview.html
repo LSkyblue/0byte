@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>气泡皮肤预览</title>
+<!-- 给陪伴会话看自己做的皮肤（preview_page 的 skin、bubble_skin_preview 的草稿），平时没有入口。样式跟聊天里同一份（skin-rules.js）。
+     白天、夜间两栏；设了聊天背景的话再加背景下的两栏（现在的背景图、蒙白、气泡透明度和毛玻璃，跟聊天页一样画） -->
+<link rel="stylesheet" href="/vendor/fonts/noto-serif-sc.css">
+<script src="/skin-rules.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.p { position: relative; isolation: isolate; padding: 10px 14px 18px; overflow: hidden; }
+.p-light { --bg: #fff; background: #fff; color: #1D1D1F; }
+.p-dark { --bg: #151515; background: #151515; color: #EDEDED; }
+.p small { position: relative; display: block; margin-bottom: 2px; font-size: 12px; opacity: .6; }
+.p .bgi, .p .wash { position: absolute; inset: 0; z-index: -2; pointer-events: none; }
+.p .bgi { background: center / cover no-repeat; }
+.p .wash { z-index: -1; background: var(--bg); }
+.mrow { display: flex; margin-top: 4px; }
+.mrow.head { margin-top: 18px; }
+.mrow.me { justify-content: flex-end; }
+.bub { max-width: 78%; padding: 10px 14px; border-radius: 20px; font-size: 16px; line-height: 1.45; }
+.mrow.ai .bub { font-family: ui-serif, "New York", "Iowan Old Style", "Noto Serif SC", "Songti SC", Georgia, serif; }
+.glass .bub { -webkit-backdrop-filter: blur(10px) saturate(1.15); backdrop-filter: blur(10px) saturate(1.15); }
+</style></head><body><div id="out"></div>
+<script>
+const q = new URLSearchParams(location.search), t = q.get('t') || '', out = document.getElementById('out');
+fetch('/api/skin-preview?id=' + encodeURIComponent(q.get('id') || '') + '&t=' + encodeURIComponent(t)).then(r => r.json()).then(d => {
+  const sk = d.skin;
+  if (!sk) { out.textContent = '没找到这款皮肤'; return; }
+  const night = { ...sk, dark: null, me: { ...sk.me, ...(sk.dark?.me || {}) }, ai: { ...sk.ai, ...(sk.dark?.ai || {}) } };
+  const day = { ...sk, dark: null };
+  const st = document.createElement('style');
+  st.textContent = skinRules(day, '.s-day', t) + '\n' + skinRules(night, '.s-night', t);
+  document.head.append(st);
+  const LINES = [['ai', 1, '今天怎么样呀'], ['ai', 0, '我刚才看到一朵很好看的花，想拍给你看，可是我没有手。'], ['me', 1, '哈哈哈哈'], ['me', 0, '那你画给我看嘛'], ['ai', 1, '好']];
+  const panels = [['p-light s-day', '白天', false], ['p-dark s-night', '夜间', false]];
+  if (d.bg) panels.push(['p-light s-day', '聊天背景 · 白天', true], ['p-dark s-night', '聊天背景 · 夜间', true]);
+  for (const [cls, label, withBg] of panels) {
+    const p = document.createElement('div'); p.className = 'p ' + cls;
+    if (withBg) {
+      const a = Math.min(1, Math.max(0.3, +d.bubbleAlpha || 1));
+      p.style.setProperty('--bub-a', String(a));
+      if (a < 0.995) p.classList.add('glass');
+      const bgi = document.createElement('div'); bgi.className = 'bgi'; bgi.style.backgroundImage = `url("/api/media/${encodeURIComponent(d.bg)}?t=${encodeURIComponent(t)}")`;
+      const wash = document.createElement('div'); wash.className = 'wash'; wash.style.opacity = String(d.bgDim ?? 0.82);
+      p.append(bgi, wash);
+    }
+    const sm = document.createElement('small'); sm.textContent = label; p.append(sm);
+    for (const [k, head, text] of LINES) {
+      const row = document.createElement('div'); row.className = 'mrow ' + k + (head ? ' head' : '');
+      const b = document.createElement('div'); b.className = 'bub'; b.textContent = text;
+      row.append(b); p.append(row);
+    }
+    out.append(p);
+  }
+}).catch(e => { out.textContent = '读不到皮肤：' + e.message; });
+</script></body></html>

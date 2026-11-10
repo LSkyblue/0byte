@@ -1,0 +1,8 @@
+node_modules
+.token
+data/
+.DS_Store
+config.json
+*.log
+shots/
+public/vendor/*.js
